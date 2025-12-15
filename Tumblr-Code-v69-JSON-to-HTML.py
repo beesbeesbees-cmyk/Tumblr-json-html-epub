@@ -43,7 +43,7 @@ class App(tk.Frame):
             self.target_post_type_label.grid(column=0, row=3, columnspan=3)
             self.target_post_type_label['textvariable'] = self.target_post_type_display_text
 
-            options_list = [" ", "regular", "answer", "text", "photo", "audio", "video", "link", "conversation", "quote"]
+            options_list = ["", "regular", "answer", "text", "photo", "audio", "video", "link", "conversation", "quote"]
             self.target_post_type_input = tk.StringVar(frm)
             self.target_post_type = ttk.OptionMenu(frm, self.target_post_type_input, *options_list)
             self.target_post_type.grid(column=1, row=3, columnspan=3)
@@ -140,16 +140,8 @@ class App(tk.Frame):
                             Tags = tag_reader(data)
 
                             if tag_search in Tags:
-                                def the_identify_spell(data, parsed_ids, dup_index, index):
-                                    idnum = data['id']
-                                    if idnum in parsed_ids:
-                                        dup_index += 1
-                                    else: 
-                                        index += 1
-                                        parsed_ids.append(idnum)
-                                    return idnum, parsed_ids, dup_index, index
-                                
-                                idnum, parsed_ids, dup_index, index = the_identify_spell(data, parsed_ids, dup_index, index)
+
+                                idnum = data['id']
 
                                 def op_finder(data):
                                     if 'reblogged_root_name' in data.keys() and data['reblogged_root_name'] != '':
@@ -223,7 +215,7 @@ class App(tk.Frame):
                                     elif post_type == 'text' or post_type == 'regular':
                                         html_out = html_base +  date + " \r\n <p>" + disp + "</p>"
                                     elif post_type == 'photo': 
-                                        
+                                        cap = ""
                                         if 'photoset_photos' in data.keys() and data['photoset_photos'] != []:
                                             b = []
                                             index_num = 0
@@ -252,7 +244,7 @@ class App(tk.Frame):
                                         if "photo-url-1280" not in data.keys() and 'photoset_photos' not in data.keys() and 'post_html' in data.keys() and data['post_html'] != []:
                                             disp = data['post_html']  
                                             cap = ''
-                                        else: 
+                                        elif cap == "": 
                                             cap = ''
 
                                         html_out = html_base + date + " \r\n <p>" + disp + "</p>" + cap
@@ -344,6 +336,17 @@ class App(tk.Frame):
                                 html_out = stuff_remover(html_out)
                                 
                                 if search_term in html_out:
+
+                                    def the_identify_spell(parsed_ids, dup_index, index):
+                                        if idnum in parsed_ids:
+                                            dup_index += 1
+                                        else: 
+                                            index += 1
+                                            parsed_ids.append(idnum)
+                                        return parsed_ids, dup_index, index
+                                
+                                    parsed_ids, dup_index, index = the_identify_spell(parsed_ids, dup_index, index)
+
                                     if 'CANNOT CURRENTLY DISPLAY' in html_out:
                                         print(f"COULD NOT WRITE: {name}")
                                     else:
