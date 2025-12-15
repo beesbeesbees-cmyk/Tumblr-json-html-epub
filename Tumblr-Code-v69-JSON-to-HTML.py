@@ -43,7 +43,7 @@ class App(tk.Frame):
             self.target_post_type_label.grid(column=0, row=3, columnspan=3)
             self.target_post_type_label['textvariable'] = self.target_post_type_display_text
 
-            options_list = ["regular", "answer", "text", "photo", "audio", "video", "link", "conversation", "quote"]
+            options_list = [" ", "regular", "answer", "text", "photo", "audio", "video", "link", "conversation", "quote"]
             self.target_post_type_input = tk.StringVar(frm)
             self.target_post_type = ttk.OptionMenu(frm, self.target_post_type_input, *options_list)
             self.target_post_type.grid(column=1, row=3, columnspan=3)
