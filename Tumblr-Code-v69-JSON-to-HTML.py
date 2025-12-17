@@ -1,4 +1,3 @@
-## STEP 0: Initialization.
 import json
 import re
 import fnmatch
@@ -43,7 +42,7 @@ class App(tk.Frame):
             self.target_post_type_label.grid(column=0, row=3, columnspan=3)
             self.target_post_type_label['textvariable'] = self.target_post_type_display_text
 
-            options_list = ["", "regular", "answer", "text", "photo", "audio", "video", "link", "conversation", "quote"]
+            options_list = ["", "all", "regular", "answer", "text", "photo", "audio", "video", "link", "conversation", "quote"]
             self.target_post_type_input = tk.StringVar(frm)
             self.target_post_type = ttk.OptionMenu(frm, self.target_post_type_input, *options_list)
             self.target_post_type.grid(column=1, row=3, columnspan=3)
@@ -77,10 +76,13 @@ class App(tk.Frame):
             self.status_label['textvariable'] = self.status_display_text
             
             self.confirm_button = ttk.Button(frm, text="Confirm", command=self.execute) # Self passes itself as first param
-            self.confirm_button.grid(column=1, row=7, columnspan=1, sticky="SE")
+            self.confirm_button.grid(column=1, row=8, columnspan=1, sticky="SE")
             self.confirm_button.state(['disabled'])
             self.exit_button = ttk.Button(frm, text="Exit", command=root.destroy)
-            self.exit_button.grid(column=2, row=7, columnspan=1, sticky="SE")
+            self.exit_button.grid(column=2, row=8, columnspan=1, sticky="SE")
+
+            # self.progressbar = ttk.Progressbar(frm, length=200, mode='indeterminate')
+            # self.progressbar.grid(column=0, row=7, columnspan=3)
 
     def choose_json_directory(self):
         jsonpath = filedialog.askdirectory(title="Where are your JSON files?")
@@ -106,8 +108,8 @@ class App(tk.Frame):
         target_post_type = self.target_post_type_input.get() 
         tag_search = self.tag_search_input.get() 
         search_term = self.search_input.get() 
+        all_type = self.target_post_type_input.get()
 
-        ## STEP 2.0: Search jsonpath for .json files.
         for path, dirs, files in os.walk(jsonpath):
                 print(f"{path}")
                 for name in files:
@@ -116,7 +118,6 @@ class App(tk.Frame):
                         data = json.load(f)
 
                         def categorizer(data):
-                            ## STEP 2.4: Categorize the post.
                             if 'type' not in data.keys():
                                 post_type = 'regular'
                             elif 'originalType' in data.keys():
@@ -128,7 +129,7 @@ class App(tk.Frame):
                         
                         post_type = categorizer(data)
 
-                        if post_type == target_post_type:
+                        if post_type == target_post_type or all_type == "all":
 
                             def tag_reader(data):
                                 if "tags" in data.keys():
@@ -163,34 +164,28 @@ class App(tk.Frame):
                                 op, from_blog = op_finder(data)
 
                                 def json_structureizer(data):
-                                    ## STEP 2.7: Categorize the .json file structure.
                                     if 'trail' in data.keys():
                                         disp = 'CANNOT CURRENTLY DISPLAY'
-                                        JSON_type = "SVC"
                                         date = data['date']
                                     elif "date-gmt" in data.keys():
-                                        JSON_type = "API"
                                         date = data['date-gmt']
                                         if 'regular-body' in data.keys():
                                             disp = data['regular-body']
                                         elif 'post-text' in data.keys():
                                             disp = data['post-text']
                                     elif 'regular-title' in data.keys():
-                                        JSON_type = "SVC"
                                         date = data['date']
                                         disp = '<h3>' + data['regular-title'] + '</h3>' + '<br>' + " \r\n" + data['regular-body']
                                     elif 'post_html' in data.keys():
                                         disp = data['post_html']
-                                        JSON_type = "SVC"
                                         date = data['date']
                                     else:
                                         print(f"CANNOT PARSE: {name}")
                                         disp = ""
-                                        JSON_type = "SVC"
                                         date = data['date']
-                                    return disp, JSON_type, date
+                                    return disp, date
 
-                                disp, JSON_type, date = json_structureizer(data)
+                                disp, date = json_structureizer(data)
 
                                 def post_titler(data):
                                     if 'slug' in data.keys():
